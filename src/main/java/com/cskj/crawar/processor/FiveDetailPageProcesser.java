@@ -46,10 +46,7 @@ public class FiveDetailPageProcesser implements PageProcessor {
 
         String date = page.getHtml().xpath("//td[@class='td_title01']/span[@class='span_right']/text()").toString();
         System.out.println(date);
-        String regEx="[^0-9]";
-        Pattern p = Pattern.compile(regEx);
-        Matcher m = p.matcher(date);
-        System.out.println( m.replaceAll("").trim());
+        String lotteryDate=getNum(date);
 
     }
 

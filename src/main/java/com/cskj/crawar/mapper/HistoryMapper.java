@@ -7,7 +7,7 @@ import java.util.List;
 
 @Mapper
 public interface HistoryMapper {
-
+    @Options(useGeneratedKeys = true,keyProperty = "id")
     @Insert("insert into history(code,red,blue,poolmoney,salemoney,date,week) values(#{history.code},#{history.red}," +
             "#{history.blue},#{history.poolmoney},#{history.salemoney},#{history.date},#{history.week})")
     int add(@Param("history") History history);

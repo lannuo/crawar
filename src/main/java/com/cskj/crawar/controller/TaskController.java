@@ -4,6 +4,7 @@ import com.cskj.crawar.entity.HistoryResult;
 import com.cskj.crawar.entity.common.OperInfo;
 import com.cskj.crawar.processor.FivePageProcesser;
 import com.cskj.crawar.service.DrawHistoryService;
+import com.cskj.crawar.service.HistoryService;
 import com.cskj.crawar.util.json.JsonUtil;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
@@ -20,7 +21,7 @@ public class TaskController {
     @Autowired
     private FivePageProcesser fivePageProcesser;
     @Autowired
-    private DrawHistoryService drawHistoryService;
+    private HistoryService historyService;
 
     @RequestMapping("start")
     @ResponseBody
@@ -45,12 +46,10 @@ public class TaskController {
         HttpResponse<String> result = Unirest.get("http://www.cwl.gov.cn/cwl_admin/kjxx/findDrawNotice?name=ssq&issueCount=&issueStart=&issueEnd=&dayStart=2012-04-01&dayEnd=2019-04-07&pageNo="+pageNo)
                 .header("Referer","http://www.cwl.gov.cn/kjxx/ssq/")
                 .asString();
-        System.out.println(result);
         if (result.getStatus() == 200) {
             HistoryResult history = JsonUtil.jsonStr2Entity(result.getBody(), HistoryResult.class);
             if (history != null) {
-                System.out.println(history.getResult().get(0).getRed());
-                history.getResult().forEach(o->drawHistoryService.save(o));
+                history.getResult().forEach(o->historyService.add(o));
             }
         }
     }

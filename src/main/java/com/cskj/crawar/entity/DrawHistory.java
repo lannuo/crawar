@@ -11,21 +11,30 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DrawHistory implements Serializable {
     private Integer id;
-    private String adddmoney;
-    private String addmoney2;
+    private String code;
+    private String red;
     @JsonProperty("blue")
     private String blue;
-    private String blue2;
-    private String code;
-    private String content;
+    private String poolmoney;
+    private String sales;
     private String date;
+    private String week;
+
+
+    private String adddmoney;
+    private String addmoney2;
+
+    private String blue2;
+
+    private String content;
+
     private String datailsLink;
     private String name;
-    private String poolmoney;
-    private String red;
-    private String sales;
+
+
+
     private String videoLink;
-    private String week;
+
     private List<Prizegrades> prizegrades;
 
 }

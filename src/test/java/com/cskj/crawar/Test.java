@@ -1,6 +1,5 @@
 package com.cskj.crawar;
 
-import com.cskj.crawar.entity.DrawHistory;
 import com.cskj.crawar.entity.HistoryResult;
 import com.cskj.crawar.util.json.JsonUtil;
 import com.mashape.unirest.http.HttpResponse;

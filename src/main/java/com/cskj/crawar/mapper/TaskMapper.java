@@ -2,10 +2,12 @@ package com.cskj.crawar.mapper;
 
 import com.cskj.crawar.entity.ssq.Task;
 import org.apache.ibatis.annotations.*;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Mapper
+@Component
 public interface TaskMapper {
     @Insert("insert into task(code,url,status) values(#{task.code},#{task.url},#{task.status})")
     int add(@Param("task") Task task);

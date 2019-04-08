@@ -30,6 +30,11 @@ public class TaskController {
         return new OperInfo();
     }
 
+    /**
+     * 添加历史
+     * @param pageNo
+     * @return
+     */
     @RequestMapping("history")
     @ResponseBody
     public OperInfo history(int pageNo) {
@@ -41,6 +46,11 @@ public class TaskController {
         return new OperInfo();
     }
 
+    /**
+     * 批量添加历史记录
+     * @param pageNo
+     * @return
+     */
     @RequestMapping("batchHistory")
     @ResponseBody
     public OperInfo batchHistory(int pageNo) {

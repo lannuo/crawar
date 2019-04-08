@@ -25,19 +25,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AppException.class)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public OperInfo handleAppException(HttpServletRequest request, Exception ex) {
-        return new OperInfo(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+    public OperInfo handleAppException(AppException ex) {
+        return new OperInfo(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMsg());
     }
 
     @ExceptionHandler(PageException.class)
     @ResponseStatus(HttpStatus.OK)
-    public OperInfo handlePageException(HttpServletRequest request, Exception ex) {
+    public OperInfo handlePageException(PageException ex) {
         return new OperInfo(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.OK)
-    public OperInfo handleException(HttpServletRequest request, Exception ex) {
+    public OperInfo handleException(Exception ex) {
         return new OperInfo(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
     }
 

@@ -10,12 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class HistoryService {
@@ -28,6 +25,11 @@ public class HistoryService {
         return historyMapper.findById(id);
     }
 
+    /**
+     * 单个保存
+     *
+     * @param history
+     */
     @Transactional
     public void add(History history) {
         String date = history.getDate();
@@ -47,6 +49,11 @@ public class HistoryService {
         }
     }
 
+    /**
+     * 批量保存
+     *
+     * @param histories
+     */
     @Transactional
     public void batchAdd(List<History> histories) {
         if (histories != null && histories.size() > 0) {
@@ -76,15 +83,44 @@ public class HistoryService {
         historyMapper.deleteById(id);
     }
 
+    /**
+     * 查询所有
+     *
+     * @return
+     */
     public List<History> findAll() {
-        return historyMapper.findAll();
+        List<History> all = historyMapper.findAll();
+        if(all!=null && all.size()>0){
+            all.forEach(o->{
+                o.setPrizes(prizeMapper.findByCode(o.getCode()));
+            });
+        }
+        return all;
     }
 
+    /**
+     * 查找最新
+     *
+     * @return
+     */
     public History findLast() {
-        return historyMapper.findLast();
+        History history = historyMapper.findLast();
+        history.setPrizes(prizeMapper.findByCode(history.getCode()));
+        return history;
     }
 
-    private static Date formatDateString(String date) {
+    /**
+     * 根据code查找
+     * @param code
+     * @return
+     */
+    public History findByCode(String code){
+        History history = historyMapper.findByCode(code);
+        history.setPrizes(prizeMapper.findByCode(history.getCode()));
+        return history;
+    }
+
+    private Date formatDateString(String date) {
         int index = date.indexOf("(");
         String str = date.substring(0, index);
         return DateUtil.parseDate(str, null);

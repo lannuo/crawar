@@ -54,15 +54,23 @@ spring:
           config:
             # 允许批量操作
             multi-statement-allow: true
-
+# mybatis 配置
 mybatis:
   type-aliases-package: com.cskj.crawar.entity.ssq
   configuration:
     map-underscore-to-camel-case: true
+# mybatis 分页插件配置
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
 
+# 服务配置
 server:
   port: 8080
 
+# 定时任务xxl-job配置
 xxl:
   job:
     admin:

@@ -1,10 +1,7 @@
 package com.cskj.crawar.mapper;
 
 import com.cskj.crawar.entity.ssq.Prize;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -23,4 +20,7 @@ public interface PrizeMapper {
             "(#{tx.code},#{tx.type},#{tx.num},#{tx.money})" +
             "</foreach></script>")
     void batchAdd(@Param("txList") List<Prize> txList);
+
+    @Select("select * from prize where code =#{code}")
+    List<Prize> findByCode(@Param("code") String code);
 }

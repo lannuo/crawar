@@ -29,6 +29,9 @@ public interface HistoryMapper {
     @Delete("delete from history where id=#{id}")
     void deleteById(@Param("id") String id);
 
-    @Select("select * from history")
+    @Select("select * from history order by lottery_date desc")
     List<History> findAll();
+
+    @Select("select * from history where code=#{code}")
+    History findByCode(@Param("code") String code);
 }

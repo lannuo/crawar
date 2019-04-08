@@ -14,6 +14,12 @@ public interface HistoryMapper {
             "#{history.blue},#{history.poolmoney},#{history.salemoney},#{history.lotteryDate},#{history.withdrawDate},#{history.week},#{history.content})")
     int add(@Param("history") History history);
 
+    @Insert("<script><foreach collection='txList' item='tx' index='index' separator=';'>" +
+            "insert into history(code,red,blue,poolmoney,salemoney,lottery_date,withdraw_date,week,content) values " +
+            "(#{tx.code},#{tx.red}, #{tx.blue},#{tx.poolmoney},#{tx.salemoney},#{tx.lotteryDate},#{tx.withdrawDate},#{tx.week},#{tx.content})" +
+            "</foreach></script>")
+    void batchAdd(@Param("txList") List<History> txList);
+
     @Select("select * from history where id =#{id}")
     History findById(@Param("id") String id);
 

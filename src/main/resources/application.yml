@@ -27,7 +27,7 @@ spring:
       test-on-return: false
       pool-prepared-statements: true
       # 配置监控统计拦截的filters,去掉后监控界面sql无法统计,'wall' 用于防火墙
-      filters: stat,wall,log4j
+      filters: stat,log4j
       max-pool-prepared-statement-per-connection-size: 20
       use-global-data-source-stat: true
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
@@ -49,6 +49,12 @@ spring:
         login-username: admin
         # 登录密码
         login-password: 123456
+      filter:
+        wall:
+          config:
+            # 允许批量操作
+            multi-statement-allow: true
+
 mybatis:
   type-aliases-package: com.cskj.crawar.entity.ssq
   configuration:

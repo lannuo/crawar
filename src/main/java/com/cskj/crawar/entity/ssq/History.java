@@ -1,6 +1,7 @@
 package com.cskj.crawar.entity.ssq;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -40,6 +41,8 @@ public class History implements Serializable {
 
     private String date;
 
+    private List<String> reds;//红球数组
+
     public History() {
     }
 
@@ -69,5 +72,14 @@ public class History implements Serializable {
     @JsonProperty("prizegrades")
     public void setPrizes(List<Prize> prizes) {
         this.prizes = prizes;
+    }
+
+    @JsonIgnore
+    public String getDate() {
+        return date;
+    }
+    @JsonProperty("date")
+    public void setDate(String date) {
+        this.date = date;
     }
 }

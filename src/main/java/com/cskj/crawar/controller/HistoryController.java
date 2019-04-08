@@ -25,14 +25,14 @@ public class HistoryController {
 
     /**
      * 分页查询
-     * @param num
-     * @param size
+     * @param pageNo
+     * @param pageSize
      * @return
      */
     @RequestMapping("list")
     @ResponseBody
-    public OperInfo findList(int num, int size) {
-        PageHelper.startPage(num, size);
+    public OperInfo findList(int pageNo, int pageSize) {
+        PageHelper.startPage(pageNo, pageSize);
         List<History> all = historyService.findAll();
         return new OperInfo("list", all);
     }

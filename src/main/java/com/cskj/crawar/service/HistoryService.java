@@ -11,11 +11,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 @Service
 public class HistoryService {
+    
     @Autowired
     private HistoryMapper historyMapper;
     @Autowired
@@ -90,9 +92,9 @@ public class HistoryService {
      */
     public List<History> findAll() {
         List<History> all = historyMapper.findAll();
-        if(all!=null && all.size()>0){
-            all.forEach(o->{
-                o.setPrizes(prizeMapper.findByCode(o.getCode()));
+        if (all != null && all.size() > 0) {
+            all.forEach(o -> {
+                refactor(o);
             });
         }
         return all;
@@ -105,21 +107,38 @@ public class HistoryService {
      */
     public History findLast() {
         History history = historyMapper.findLast();
-        history.setPrizes(prizeMapper.findByCode(history.getCode()));
+        refactor(history);
         return history;
     }
 
     /**
      * 根据code查找
+     *
      * @param code
      * @return
      */
-    public History findByCode(String code){
+    public History findByCode(String code) {
         History history = historyMapper.findByCode(code);
-        history.setPrizes(prizeMapper.findByCode(history.getCode()));
+        refactor(history);
         return history;
     }
 
+    /**
+     * 重构结果
+     *
+     * @param history
+     */
+    private void refactor(History history) {
+        history.setReds(Arrays.asList(StringUtils.split(history.getRed(), ",")));
+        history.setPrizes(prizeMapper.findByCode(history.getCode()));
+    }
+
+    /**
+     * 处理日期
+     *
+     * @param date
+     * @return
+     */
     private Date formatDateString(String date) {
         int index = date.indexOf("(");
         String str = date.substring(0, index);

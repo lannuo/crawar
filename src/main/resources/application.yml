@@ -79,7 +79,7 @@ spring:
     timeout: 10000
   cache:
     redis:
-      time-to-live: 5s
+      time-to-live: 10s
 
 
 

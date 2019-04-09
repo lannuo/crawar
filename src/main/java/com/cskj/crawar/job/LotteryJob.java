@@ -23,6 +23,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Instant;
 
 /**
  * 获取最新开奖信息定时任务
@@ -65,7 +66,7 @@ public class LotteryJob extends IJobHandler {
                 if (history != null) {
                     XxlJobLogger.log("get new history from api" + history.getResult().size());
                     history.getResult().forEach(o -> historyService.add(o));
-                    XxlJobLogger.log("get new lasthisory from api");
+                    XxlJobLogger.log("get new lasthisory from api"+ Instant.now());
                 }
             }
         } catch (UnirestException e) {

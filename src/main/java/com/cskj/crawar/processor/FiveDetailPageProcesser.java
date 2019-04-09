@@ -6,6 +6,8 @@ import com.cskj.crawar.exception.AppException;
 import com.cskj.crawar.service.HistoryService;
 import com.cskj.crawar.util.date.DateUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
@@ -20,8 +22,9 @@ import java.util.regex.Pattern;
 
 @Component
 public class FiveDetailPageProcesser implements PageProcessor {
-    private Site site = new Site().setRetryTimes(3).setSleepTime(100);
 
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+    private Site site = new Site().setRetryTimes(3).setSleepTime(100);
     private History history;
 
     @Autowired
@@ -29,55 +32,56 @@ public class FiveDetailPageProcesser implements PageProcessor {
 
     @Override
     public void process(Page page) {
-        //http://kaijiang.500.com/shtml/ssq/19037.shtml
+        log.info("start crawl 500.com process");
         page.addTargetRequest(page.getHtml().links().regex("http://kaijiang\\.500\\.com/shtml/ssq\\d+").toString());
 
         //获取奖金池金额和销售金额
         List<String> poolMoneyArr = analysisList(page, "//span[@class='cfont1 ']/text()");
-        poolMoneyArr.forEach(o -> System.out.println("poolMoneyArr" + o));
+        poolMoneyArr.forEach(o -> log.info("poolMoneyArr {}", o));
 
         //获取红色球顺序
         String redSequenceStr = analysisString(page, "//table[@class='kj_tablelist02']//table//tr[2]/td[2]/text()");
         String redSequence = analysisRedSequence(redSequenceStr);
-        System.out.println("redSequence" + redSequence);
+        log.info("redSequence {}", redSequence);
 
         //获取红色球
         List<String> redArr = analysisList(page, "//li[@class='ball_red']/text()");
         String red = analysisRed(redArr);
-        System.out.println("red" + red);
+        log.info("red {}", red);
 
         //获取蓝色球
         String blue = analysisString(page, "//li[@class='ball_blue']/text()");
-        System.out.println("blue" + blue);
+        log.info("blue {}", blue);
 
         //获取中奖注数
         List<String> prizeArr = analysisList(page, "//table[@class='kj_tablelist02'][2]//tr/td[2]/text()");
         anlysisPrize(prizeArr);
-        prizeArr.forEach(o -> System.out.println("num" + o));
+        prizeArr.forEach(o -> log.info("num {}", o));
 
         //获取奖金数
         List<String> prizeMoneyArr = analysisList(page, "//table[@class='kj_tablelist02'][2]//tr/td[3]/text()");
         anlysisPrizeMoney(prizeMoneyArr);
-        prizeMoneyArr.forEach(o -> System.out.println("money" + o));
+        prizeMoneyArr.forEach(o -> log.info("money {}", o));
 
         //获取开奖日期和最后兑奖日期
         String dateStr = analysisString(page, "//td[@class='td_title01']/span[@class='span_right']/text()");
         String[] dateArry = anlysisDate(dateStr);
         Date lotteryDate = formatDateString(dateArry[0]);
         Date withdrawDate = formatDateString(dateArry[1]);
-        System.out.println(lotteryDate);
-        System.out.println(withdrawDate);
+        log.info("lotteryDate {}", lotteryDate);
+        log.info("withdrawDate ", withdrawDate);
 
         //获取期号
         String codeStr = "20" + analysisString(page, "//a[@id='change_date']/text()");
-        System.out.println("codeStr" + "20" + codeStr);
-        history=null;
+        log.info("codeStr" + "20" + codeStr);
+        history = null;
         history = new History(codeStr, red, redSequence, blue, poolMoneyArr.get(0), poolMoneyArr.get(1), lotteryDate, withdrawDate);
         List<Prize> prizeList = new ArrayList<>();
         for (int i = 0; i < prizeArr.size(); i++) {
             prizeList.add(new Prize(i, prizeArr.get(i), prizeMoneyArr.get(i)));
         }
         history.setPrizes(prizeList);
+        log.info("end crawl 500.com process");
     }
 
     @Override
@@ -85,7 +89,7 @@ public class FiveDetailPageProcesser implements PageProcessor {
         return site;
     }
 
-    public void saveData(){
+    public void saveData() {
         historyService.add(history);
     }
 

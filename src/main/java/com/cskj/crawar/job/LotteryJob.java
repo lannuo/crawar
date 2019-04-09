@@ -16,6 +16,8 @@ import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.JobHandler;
 import com.xxl.job.core.log.XxlJobLogger;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,9 @@ import java.io.IOException;
 @JobHandler(value = "lotteryJob")
 @Component
 public class LotteryJob extends IJobHandler {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
 
     @Autowired
     private HistoryService historyService;
@@ -50,7 +55,7 @@ public class LotteryJob extends IJobHandler {
      */
     @Async
     public void getFromApi(int code) {
-        System.out.println("执行 getFromApi");
+        log.info("start execute getFromApi");
         try {
             HttpResponse<String> result = Unirest.get("http://www.cwl.gov.cn/cwl_admin/kjxx/findKjxx/forIssue?name=ssq&code=" + code)
                     .header("Referer", "http://www.cwl.gov.cn/kjxx/ssq/")
@@ -58,7 +63,7 @@ public class LotteryJob extends IJobHandler {
             if (result.getStatus() == 200) {
                 HistoryResult history = JsonUtil.jsonStr2Entity(result.getBody(), HistoryResult.class);
                 if (history != null) {
-                    XxlJobLogger.log("get new history from api"+history.getResult().size());
+                    XxlJobLogger.log("get new history from api" + history.getResult().size());
                     history.getResult().forEach(o -> historyService.add(o));
                     XxlJobLogger.log("get new lasthisory from api");
                 }
@@ -76,11 +81,12 @@ public class LotteryJob extends IJobHandler {
 
     /**
      * 从购买的api中获取最新信息
+     *
      * @param history
      */
     @Async
     public void getFromBuy(History history) {
-        System.out.println("执行 getFromBuy");
+        log.info("start execute getFromBuy");
         //http://101.37.189.39:7442/newly.do?token=40f0bc9ff8657b9f&code=ssq&format=json
 
         try {
@@ -90,7 +96,7 @@ public class LotteryJob extends IJobHandler {
                 OpencaiResult opencaiResult = JsonUtil.jsonStr2Entity(result.getBody(), OpencaiResult.class);
                 if (opencaiResult != null) {
                     OpencaiHistory opencaiHistory = opencaiResult.getData().get(0);
-                    XxlJobLogger.log("get new history from buy "+opencaiHistory.getOpencode());
+                    XxlJobLogger.log("get new history from buy " + opencaiHistory.getOpencode());
                     if (Integer.valueOf(opencaiHistory.getExpect()) > Integer.valueOf(history.getCode())) {
 
                         String[] split = StringUtils.split(opencaiHistory.getOpencode(), "+");

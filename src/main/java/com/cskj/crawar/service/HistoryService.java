@@ -2,11 +2,13 @@ package com.cskj.crawar.service;
 
 import com.cskj.crawar.entity.ssq.History;
 import com.cskj.crawar.entity.ssq.Prize;
+import com.cskj.crawar.exception.AppException;
 import com.cskj.crawar.mapper.HistoryMapper;
 import com.cskj.crawar.mapper.PrizeMapper;
 import com.cskj.crawar.util.date.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +19,7 @@ import java.util.List;
 
 @Service
 public class HistoryService {
-    
+
     @Autowired
     private HistoryMapper historyMapper;
     @Autowired
@@ -35,18 +37,25 @@ public class HistoryService {
     @Transactional
     public void add(History history) {
         String date = history.getDate();
-        Date formatDate = formatDateString(date);
-        history.setLotteryDate(formatDate);
-        history.setWithdrawDate(DateUtil.addDay(formatDate, 60));
-        historyMapper.add(history);
+        if (StringUtils.isNotBlank(date)) {
+            Date formatDate = formatDateString(date);
+            history.setLotteryDate(formatDate);
+            history.setWithdrawDate(DateUtil.addDay(formatDate, 60));
+        }
+        try {
+            historyMapper.add(history);
+        } catch (DuplicateKeyException e) {
+            throw new AppException(history.getCode() + " data has aleardy exit !");
+        }
 
         List<Prize> prizegrades = history.getPrizes();
         if (prizegrades != null && prizegrades.size() > 0) {
             prizegrades.forEach(o -> {
-                o.setCode(history.getCode());
-                if (StringUtils.isNotBlank(o.getNum())) {
-                    prizeMapper.add(o);
+                if (StringUtils.isBlank(o.getNum())) {
+                    o.setNum("0");
                 }
+                o.setCode(history.getCode());
+                prizeMapper.add(o);
             });
         }
     }
@@ -62,17 +71,20 @@ public class HistoryService {
             List<Prize> prizeList = new ArrayList<>();
             histories.forEach(history -> {
                 String date = history.getDate();
-                Date formatDate = formatDateString(date);
-                history.setLotteryDate(formatDate);
-                history.setWithdrawDate(DateUtil.addDay(formatDate, 60));
+                if (StringUtils.isNotBlank(date)) {
+                    Date formatDate = formatDateString(date);
+                    history.setLotteryDate(formatDate);
+                    history.setWithdrawDate(DateUtil.addDay(formatDate, 60));
+                }
 
                 List<Prize> prizegrades = history.getPrizes();
                 if (prizegrades != null && prizegrades.size() > 0) {
                     prizegrades.forEach(prize -> {
                         prize.setCode(history.getCode());
-                        if (StringUtils.isNotBlank(prize.getNum())) {
-                            prizeList.add(prize);
+                        if (StringUtils.isBlank(prize.getNum())) {
+                            prize.setNum("0");
                         }
+                        prizeList.add(prize);
                     });
                 }
             });

@@ -24,6 +24,7 @@ public class TaskController {
 
     @Autowired
     private FivePageProcesser fivePageProcesser;
+
     @Autowired
     private HistoryService historyService;
 

@@ -20,6 +20,8 @@ public class History implements Serializable {
 
     private String red;//红球
 
+    private String redsq;//红球顺序
+
     @JsonProperty("blue")
     private String blue;//蓝球
 
@@ -46,24 +48,27 @@ public class History implements Serializable {
     public History() {
     }
 
-    public History(String code, String red, String blue, String poolmoney, String salemoney, Date lotteryDate, Date withdrawDate, String week) {
+    public History(String code, String red, String redsq, String blue, String salemoney, String poolmoney, Date lotteryDate, Date withdrawDate) {
         this.code = code;
         this.red = red;
+        this.redsq = redsq;
         this.blue = blue;
         this.poolmoney = poolmoney;
         this.salemoney = salemoney;
         this.lotteryDate = lotteryDate;
         this.withdrawDate = withdrawDate;
-        this.week = week;
     }
+
     @JsonProperty("salemoney")
     public String getSalemoney() {
         return salemoney;
     }
+
     @JsonProperty("sales")
     public void setSalemoney(String salemoney) {
         this.salemoney = salemoney;
     }
+
     @JsonProperty("prizes")
     public List<Prize> getPrizes() {
         return prizes;
@@ -78,6 +83,7 @@ public class History implements Serializable {
     public String getDate() {
         return date;
     }
+
     @JsonProperty("date")
     public void setDate(String date) {
         this.date = date;

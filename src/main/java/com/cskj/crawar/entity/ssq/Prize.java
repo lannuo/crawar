@@ -15,6 +15,15 @@ public class Prize implements Serializable {
     private String num;//中奖注数
     private String money;//中奖金额
 
+    public Prize() {
+    }
+
+    public Prize(Integer type, String num, String money) {
+        this.type = type;
+        this.num = num;
+        this.money = money;
+    }
+
     @JsonProperty("num")
     public String getNum() {
         return num;

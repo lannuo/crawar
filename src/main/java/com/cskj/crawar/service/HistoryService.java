@@ -8,6 +8,7 @@ import com.cskj.crawar.mapper.PrizeMapper;
 import com.cskj.crawar.util.date.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ public class HistoryService {
     private HistoryMapper historyMapper;
     @Autowired
     private PrizeMapper prizeMapper;
-
+    @Cacheable(value="crawl", key="'history_'+#id")
     public History findById(String id) {
         return historyMapper.findById(id);
     }
@@ -102,6 +103,7 @@ public class HistoryService {
      *
      * @return
      */
+    @Cacheable(value="crawl", key="'history_all'")
     public List<History> findAll() {
         List<History> all = historyMapper.findAll();
         if (all != null && all.size() > 0) {
@@ -117,6 +119,7 @@ public class HistoryService {
      *
      * @return
      */
+    @Cacheable(value="crawl", key="'history_last'")
     public History findLast() {
         History history = historyMapper.findLast();
         refactor(history);
@@ -129,6 +132,7 @@ public class HistoryService {
      * @param code
      * @return
      */
+    @Cacheable(value="crawl", key="'history_'+#code")
     public History findByCode(String code) {
         History history = historyMapper.findByCode(code);
         refactor(history);

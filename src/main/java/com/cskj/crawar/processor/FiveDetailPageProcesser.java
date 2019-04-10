@@ -15,10 +15,12 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Component
 public class FiveDetailPageProcesser implements PageProcessor {
@@ -37,7 +39,7 @@ public class FiveDetailPageProcesser implements PageProcessor {
 
         //获取奖金池金额和销售金额
         List<String> poolMoneyArr = analysisList(page, "//span[@class='cfont1 ']/text()");
-        poolMoneyArr.forEach(o -> log.info("poolMoneyArr {}", o));
+        poolMoneyArr=poolMoneyArr.stream().map(o->getNum(o)).collect(Collectors.toList());
 
         //获取红色球顺序
         String redSequenceStr = analysisString(page, "//table[@class='kj_tablelist02']//table//tr[2]/td[2]/text()");
@@ -56,12 +58,11 @@ public class FiveDetailPageProcesser implements PageProcessor {
         //获取中奖注数
         List<String> prizeArr = analysisList(page, "//table[@class='kj_tablelist02'][2]//tr/td[2]/text()");
         anlysisPrize(prizeArr);
-        prizeArr.forEach(o -> log.info("num {}", o));
 
         //获取奖金数
         List<String> prizeMoneyArr = analysisList(page, "//table[@class='kj_tablelist02'][2]//tr/td[3]/text()");
         anlysisPrizeMoney(prizeMoneyArr);
-        prizeMoneyArr.forEach(o -> log.info("money {}", o));
+        prizeMoneyArr=prizeMoneyArr.stream().map(o->getNum(o)).collect(Collectors.toList());
 
         //获取开奖日期和最后兑奖日期
         String dateStr = analysisString(page, "//td[@class='td_title01']/span[@class='span_right']/text()");
@@ -78,7 +79,7 @@ public class FiveDetailPageProcesser implements PageProcessor {
         history = new History(codeStr, red, redSequence, blue, poolMoneyArr.get(0), poolMoneyArr.get(1), lotteryDate, withdrawDate);
         List<Prize> prizeList = new ArrayList<>();
         for (int i = 0; i < prizeArr.size(); i++) {
-            prizeList.add(new Prize(i, prizeArr.get(i), prizeMoneyArr.get(i)));
+            prizeList.add(new Prize(i+1, prizeArr.get(i), prizeMoneyArr.get(i)));
         }
         history.setPrizes(prizeList);
         log.info("end crawl 500.com process");
@@ -174,7 +175,7 @@ public class FiveDetailPageProcesser implements PageProcessor {
     }
 
 
-    private String getNum(String str) {
+    private static String getNum(String str) {
         String regEx = "[^0-9]";
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(str);
@@ -187,6 +188,9 @@ public class FiveDetailPageProcesser implements PageProcessor {
 //
 //        SpiderMonitor.instance().register(spider);
 //        spider.start();
-
+        List<String> list= Arrays.asList("335,974,062元","125,974,062元");
+        list=list.stream().map(o->getNum(o)).collect(Collectors.toList());
+        list.forEach(o-> System.out.println(o));
+        System.out.println(getNum("335,974,062元"));
     }
 }

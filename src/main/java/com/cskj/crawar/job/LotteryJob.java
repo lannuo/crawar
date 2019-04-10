@@ -5,6 +5,7 @@ import com.cskj.crawar.entity.opencai.OpencaiHistory;
 import com.cskj.crawar.entity.opencai.OpencaiResult;
 import com.cskj.crawar.entity.ssq.History;
 import com.cskj.crawar.service.HistoryService;
+import com.cskj.crawar.util.date.DateUtil;
 import com.cskj.crawar.util.json.JsonUtil;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 
 /**
  * 获取最新开奖信息定时任务
@@ -42,7 +44,12 @@ public class LotteryJob extends IJobHandler {
     public ReturnT<String> execute(String s) throws Exception {
         History history = historyService.findLast();
         if (history != null) {
-            int code = Integer.valueOf(history.getCode()) + 1;
+            int code=0;
+            if(DateUtil.compareYear(history.getLotteryDate())) {
+                code = Integer.valueOf(history.getCode()) + 1;
+            }else{
+                code= Integer.valueOf(LocalDate.now().getYear()+"001");
+            }
             getFromApi(code);
             getFromBuy(history);
         }
@@ -66,6 +73,7 @@ public class LotteryJob extends IJobHandler {
                 if (history != null) {
                     XxlJobLogger.log("get new history from api" + history.getResult().size());
                     history.getResult().forEach(o -> historyService.add(o));
+                    log.info("end execute getFromApi");
                     XxlJobLogger.log("get new lasthisory from api"+ Instant.now());
                 }
             }
@@ -104,8 +112,9 @@ public class LotteryJob extends IJobHandler {
                         History h = new History();
                         h.setRed(split[0]);
                         h.setBlue(split[1]);
-                        historyService.add(h);
-                        XxlJobLogger.log("get new lasthisory from buy");
+//                        historyService.add(h);
+                        log.info("end execute getFromBuy");
+                        XxlJobLogger.log("get new lasthisory from buy"+Instant.now());
                     }
 
                 }

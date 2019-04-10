@@ -1,6 +1,10 @@
 package com.cskj.crawar.util.date;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -231,4 +235,22 @@ public class DateUtil {
         long t =  currdate.getTime() - new Date().getTime();
         return t / (24 * 60 * 60 * 1000);
     }
+
+	/**
+	 * 实现给定某日期，判断是星期几 date 格式必须yyyy-MM-dd
+	 */
+	public static String getWeekday(Date date) {
+		SimpleDateFormat sdw = new SimpleDateFormat("E");
+		String weekStr = sdw.format(date);
+		return StringUtils.replace(weekStr, "星期", "");
+	}
+
+	public static boolean compareYear(Date date){
+		int yearNow = LocalDate.now().getYear();
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		int year = c.get(Calendar.YEAR);
+		return year==yearNow;
+	}
+
 }

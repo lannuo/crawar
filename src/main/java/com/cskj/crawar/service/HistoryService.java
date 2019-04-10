@@ -8,6 +8,7 @@ import com.cskj.crawar.mapper.PrizeMapper;
 import com.cskj.crawar.util.date.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,8 @@ public class HistoryService {
     private HistoryMapper historyMapper;
     @Autowired
     private PrizeMapper prizeMapper;
-    @Cacheable(value="crawl", key="'history_'+#id")
+
+    @Cacheable(value = "crawl", key = "'history_'+#id")
     public History findById(String id) {
         return historyMapper.findById(id);
     }
@@ -36,12 +38,16 @@ public class HistoryService {
      * @param history
      */
     @Transactional
+    @CacheEvict(value = "crawl", key = "'history_last'")
     public void add(History history) {
         String date = history.getDate();
         if (StringUtils.isNotBlank(date)) {
             Date formatDate = formatDateString(date);
             history.setLotteryDate(formatDate);
             history.setWithdrawDate(DateUtil.addDay(formatDate, 60));
+        }
+        if(StringUtils.isBlank(history.getWeek()) && history.getLotteryDate()!=null){
+            history.setWeek(DateUtil.getWeekday(history.getLotteryDate()));
         }
         try {
             historyMapper.add(history);
@@ -67,6 +73,7 @@ public class HistoryService {
      * @param histories
      */
     @Transactional
+    @CacheEvict(value = "crawl", key = "'history_last'")
     public void batchAdd(List<History> histories) {
         if (histories != null && histories.size() > 0) {
             List<Prize> prizeList = new ArrayList<>();
@@ -103,7 +110,7 @@ public class HistoryService {
      *
      * @return
      */
-    @Cacheable(value="crawl", key="'history_all'")
+    @Cacheable(value = "crawl", key = "'history_all'")
     public List<History> findAll() {
         List<History> all = historyMapper.findAll();
         if (all != null && all.size() > 0) {
@@ -119,7 +126,7 @@ public class HistoryService {
      *
      * @return
      */
-    @Cacheable(value="crawl", key="'history_last'")
+    @Cacheable(value = "crawl", key = "'history_last'")
     public History findLast() {
         History history = historyMapper.findLast();
         refactor(history);
@@ -132,7 +139,7 @@ public class HistoryService {
      * @param code
      * @return
      */
-    @Cacheable(value="crawl", key="'history_'+#code")
+    @Cacheable(value = "crawl", key = "'history_'+#code")
     public History findByCode(String code) {
         History history = historyMapper.findByCode(code);
         refactor(history);
@@ -157,8 +164,11 @@ public class HistoryService {
      */
     private Date formatDateString(String date) {
         int index = date.indexOf("(");
-        String str = date.substring(0, index);
-        return DateUtil.parseDate(str, null);
+        if(index!=-1){
+            String str = date.substring(0, index);
+            return DateUtil.parseDate(str, null);
+        }
+        return DateUtil.parseDate(date, null);
     }
 
 }

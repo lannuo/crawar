@@ -50,13 +50,13 @@ public class HistoryService {
             history.setLotteryDate(formatDate);
             history.setWithdrawDate(DateUtil.addDay(formatDate, 60));
         }
-        if(StringUtils.isBlank(history.getWeek()) && history.getLotteryDate()!=null){
+        if (StringUtils.isBlank(history.getWeek()) && history.getLotteryDate() != null) {
             history.setWeek(DateUtil.getWeekday(history.getLotteryDate()));
         }
         try {
             historyMapper.add(history);
         } catch (DuplicateKeyException e) {
-            String msg=history.getCode() + " data has aleardy exit !";
+            String msg = history.getCode() + " data has aleardy exit !";
             log.error(msg);
             throw new AppException(msg);
         }
@@ -112,6 +112,19 @@ public class HistoryService {
     }
 
     /**
+     * 修改redSq
+     *
+     * @param code
+     * @param redsq
+     */
+    @CacheEvict(value = "crawl", key = "'history_all'")
+    public void update(String code, String redsq) {
+        if (StringUtils.isNotBlank(code) && StringUtils.isNotBlank(redsq)) {
+            historyMapper.update(code, redsq);
+        }
+    }
+
+    /**
      * 查询所有
      *
      * @return
@@ -153,6 +166,15 @@ public class HistoryService {
     }
 
     /**
+     * 查找resSq为空的数据
+     *
+     * @return
+     */
+    public List<String> findEmptySq() {
+        return historyMapper.findEmptySq();
+    }
+
+    /**
      * 重构结果
      *
      * @param history
@@ -170,7 +192,7 @@ public class HistoryService {
      */
     private Date formatDateString(String date) {
         int index = date.indexOf("(");
-        if(index!=-1){
+        if (index != -1) {
             String str = date.substring(0, index);
             return DateUtil.parseDate(str, null);
         }

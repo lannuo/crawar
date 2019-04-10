@@ -34,4 +34,10 @@ public interface HistoryMapper {
 
     @Select("select * from history where code=#{code}")
     History findByCode(@Param("code") String code);
+
+    @Select("select code from history where redsq is null order by lottery_date limit 0,10")
+    List<String> findEmptySq();
+
+    @Update("update history set redsq=#{redsq} where code=#{code}")
+    void update(@Param("code") String code,@Param("redsq") String redsq);
 }

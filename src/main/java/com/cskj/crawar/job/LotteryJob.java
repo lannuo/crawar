@@ -4,6 +4,7 @@ import com.cskj.crawar.entity.HistoryResult;
 import com.cskj.crawar.entity.opencai.OpencaiHistory;
 import com.cskj.crawar.entity.opencai.OpencaiResult;
 import com.cskj.crawar.entity.ssq.History;
+import com.cskj.crawar.processor.FiveDetailPageProcesser;
 import com.cskj.crawar.service.HistoryService;
 import com.cskj.crawar.util.date.DateUtil;
 import com.cskj.crawar.util.json.JsonUtil;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import us.codecraft.webmagic.Spider;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -35,7 +37,10 @@ import java.time.LocalDate;
 public class LotteryJob extends IJobHandler {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
+    private final String MAIN_URL = "http://kaijiang.500.com/shtml/ssq/";
 
+    @Autowired
+    private FiveDetailPageProcesser fiveDetailPageProcesser;
 
     @Autowired
     private HistoryService historyService;
@@ -44,14 +49,15 @@ public class LotteryJob extends IJobHandler {
     public ReturnT<String> execute(String s) throws Exception {
         History history = historyService.findLast();
         if (history != null) {
-            int code=0;
-            if(DateUtil.compareYear(history.getLotteryDate())) {
+            int code = 0;
+            if (DateUtil.compareYear(history.getLotteryDate())) {
                 code = Integer.valueOf(history.getCode()) + 1;
-            }else{
-                code= Integer.valueOf(LocalDate.now().getYear()+"001");
+            } else {
+                code = Integer.valueOf(LocalDate.now().getYear() + "001");
             }
             getFromApi(code);
-            getFromBuy(history);
+            getFromBuy(code);
+            getFromFivePage(code);
         }
         return ReturnT.SUCCESS;
     }
@@ -74,7 +80,7 @@ public class LotteryJob extends IJobHandler {
                     XxlJobLogger.log("get new history from api" + history.getResult().size());
                     history.getResult().forEach(o -> historyService.add(o));
                     log.info("end execute getFromApi");
-                    XxlJobLogger.log("get new lasthisory from api"+ Instant.now());
+                    XxlJobLogger.log("get new lasthisory from api" + Instant.now());
                 }
             }
         } catch (UnirestException e) {
@@ -91,10 +97,10 @@ public class LotteryJob extends IJobHandler {
     /**
      * 从购买的api中获取最新信息
      *
-     * @param history
+     * @param code
      */
     @Async
-    public void getFromBuy(History history) {
+    public void getFromBuy(int code) {
         log.info("start execute getFromBuy");
         //http://101.37.189.39:7442/newly.do?token=40f0bc9ff8657b9f&code=ssq&format=json
 
@@ -106,7 +112,7 @@ public class LotteryJob extends IJobHandler {
                 if (opencaiResult != null) {
                     OpencaiHistory opencaiHistory = opencaiResult.getData().get(0);
                     XxlJobLogger.log("get new history from buy " + opencaiHistory.getOpencode());
-                    if (Integer.valueOf(opencaiHistory.getExpect()) > Integer.valueOf(history.getCode())) {
+                    if (Integer.valueOf(opencaiHistory.getExpect()) > Integer.valueOf(code)) {
 
                         String[] split = StringUtils.split(opencaiHistory.getOpencode(), "+");
                         History h = new History();
@@ -114,7 +120,7 @@ public class LotteryJob extends IJobHandler {
                         h.setBlue(split[1]);
 //                        historyService.add(h);
                         log.info("end execute getFromBuy");
-                        XxlJobLogger.log("get new lasthisory from buy"+Instant.now());
+                        XxlJobLogger.log("get new lasthisory from buy" + Instant.now());
                     }
 
                 }
@@ -128,6 +134,21 @@ public class LotteryJob extends IJobHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 从500网站爬取数据
+     *
+     * @param code
+     */
+    @Async
+    public void getFromFivePage(int code) {
+        String codeStr = "" + code;
+        String url = MAIN_URL + codeStr.substring(2) + ".shtml";
+        Spider spider = Spider.create(fiveDetailPageProcesser).addUrl(url);
+        spider.run();
+        fiveDetailPageProcesser.saveData();
+
     }
 
 }

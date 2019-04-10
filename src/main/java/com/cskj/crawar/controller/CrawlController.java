@@ -24,7 +24,7 @@ public class CrawlController {
     @ResponseBody
     public OperInfo five(String url){
         Spider spider = Spider.create(fiveDetailPageProcesser).addUrl(url);
-        spider.run();
+        spider.start();
         fiveDetailPageProcesser.saveData();
         return new OperInfo();
     }

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
@@ -29,13 +30,16 @@ public class FiveDetailPageProcesser implements PageProcessor {
     private Site site = new Site().setRetryTimes(3).setSleepTime(100);
     private History history;
 
+    @Value("${crawl.five.regex}")
+    private String fiveRegex;
+
     @Autowired
     private HistoryService historyService;
 
     @Override
     public void process(Page page) {
         log.info("start crawl 500.com process");
-        page.addTargetRequest(page.getHtml().links().regex("http://kaijiang\\.500\\.com/shtml/ssq\\d+").toString());
+        page.addTargetRequest(page.getHtml().links().regex(fiveRegex).toString());
 
         //获取奖金池金额和销售金额
         List<String> poolMoneyArr = analysisList(page, "//span[@class='cfont1 ']/text()");

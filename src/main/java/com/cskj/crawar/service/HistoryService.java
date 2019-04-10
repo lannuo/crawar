@@ -7,6 +7,8 @@ import com.cskj.crawar.mapper.HistoryMapper;
 import com.cskj.crawar.mapper.PrizeMapper;
 import com.cskj.crawar.util.date.DateUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,6 +23,8 @@ import java.util.List;
 
 @Service
 public class HistoryService {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private HistoryMapper historyMapper;
@@ -52,7 +56,9 @@ public class HistoryService {
         try {
             historyMapper.add(history);
         } catch (DuplicateKeyException e) {
-            throw new AppException(history.getCode() + " data has aleardy exit !");
+            String msg=history.getCode() + " data has aleardy exit !";
+            log.error(msg);
+            throw new AppException(msg);
         }
 
         List<Prize> prizegrades = history.getPrizes();

@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Spider;
@@ -37,7 +38,9 @@ import java.time.LocalDate;
 public class LotteryJob extends IJobHandler {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
-    private final String MAIN_URL = "http://kaijiang.500.com/shtml/ssq/";
+
+    @Value("${crawl.five.url}")
+    private String fiveMainUrl;
 
     @Autowired
     private FiveDetailPageProcesser fiveDetailPageProcesser;
@@ -55,9 +58,9 @@ public class LotteryJob extends IJobHandler {
             } else {
                 code = Integer.valueOf(LocalDate.now().getYear() + "001");
             }
-            getFromApi(code);
-            getFromBuy(code);
-            getFromFivePage(code);
+            if(getFromApi(code)) {
+                getFromFivePage(code);
+            }
         }
         return ReturnT.SUCCESS;
     }
@@ -68,7 +71,7 @@ public class LotteryJob extends IJobHandler {
      * @param code
      */
     @Async
-    public void getFromApi(int code) {
+    public boolean getFromApi(int code) {
         log.info("start execute getFromApi");
         try {
             HttpResponse<String> result = Unirest.get("http://www.cwl.gov.cn/cwl_admin/kjxx/findKjxx/forIssue?name=ssq&code=" + code)
@@ -81,6 +84,7 @@ public class LotteryJob extends IJobHandler {
                     history.getResult().forEach(o -> historyService.add(o));
                     log.info("end execute getFromApi");
                     XxlJobLogger.log("get new lasthisory from api" + Instant.now());
+                    return true;
                 }
             }
         } catch (UnirestException e) {
@@ -92,6 +96,7 @@ public class LotteryJob extends IJobHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     /**
@@ -143,11 +148,13 @@ public class LotteryJob extends IJobHandler {
      */
     @Async
     public void getFromFivePage(int code) {
+        log.info("start execute getFromFivePage");
         String codeStr = "" + code;
-        String url = MAIN_URL + codeStr.substring(2) + ".shtml";
+        String url = fiveMainUrl + codeStr.substring(2) + ".shtml";
         Spider spider = Spider.create(fiveDetailPageProcesser).addUrl(url);
         spider.run();
         fiveDetailPageProcesser.saveData();
+        log.info("end execute getFromFivePage");
 
     }
 

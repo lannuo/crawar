@@ -125,3 +125,8 @@ xxl:
 logging:
   level:
     com.cskj.crawar.mapper : debug
+# 爬虫相关url和regex配置
+crawl:
+  five:
+    url: http://kaijiang.500.com/shtml/ssq/
+    regex: http://kaijiang\\.500\\.com/shtml/ssq\d+

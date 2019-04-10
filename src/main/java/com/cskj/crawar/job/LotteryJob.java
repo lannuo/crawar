@@ -58,7 +58,7 @@ public class LotteryJob extends IJobHandler {
             } else {
                 code = Integer.valueOf(LocalDate.now().getYear() + "001");
             }
-            if(getFromApi(code)) {
+            if(!getFromApi(code)) {
                 getFromFivePage(code);
             }
         }
